@@ -16,8 +16,9 @@ passport.use(new LocalStrategy(
                 return done(null, false, {message: "User does not exist."})
             } if (!theUser.password == password) {
                 return done(null, false, {message: "password is not valid."})
+            } if (theUser.password == password) {
+                return done(null, theUser)
             }
-            return done(null, true)
         })
     }
     ))
@@ -25,8 +26,10 @@ passport.use(new LocalStrategy(
 passport.serializeUser((user, done) => {
     done(null, user.id)
 })
-passport.deserializeUser((user, done) => {
-    User.findById(user.id, (err, user) => {
-        done(err, user)
-    })
-})
+passport.deserializeUser((userId, done) => {
+    User.findById(userId)
+        .then((user) => {
+            done(null, user);
+        })
+        .catch(err => done(err))
+});
